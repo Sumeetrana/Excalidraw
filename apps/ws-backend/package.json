@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@repo/typescript-config": "workspace:*",
+    "jsonwebtoken": "^9.0.2",
     "ws": "^8.18.3"
   },
   "keywords": [],
@@ -16,6 +17,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/ws": "^8.18.1"
   }
 }
