@@ -115,6 +115,22 @@ app.get("/chats/:roomId", async (req, res) => {
   res.json({ messages });
 });
 
+app.get("/room/:slug", async (req, res) => {
+  const slug = req.params.slug;
+  const room = await prismaClient.room.findFirst({
+    where: { slug: slug },
+  });
+
+  if (!room) {
+    return res.status(404).json({
+      message: "Room not found",
+    });
+  }
+  res.json({
+    room,
+  });
+});
+
 app.listen(8080, () => {
   console.log("Http server is running on 8080");
 });
