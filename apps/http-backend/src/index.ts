@@ -1,6 +1,5 @@
 import express from "express";
 import jwt from "jsonwebtoken";
-import { JWT_SECRET } from "@repo/backend-common/config";
 import { auth } from "./middlewares/auth";
 import {
   CreateUserSchema,
@@ -8,6 +7,7 @@ import {
   CreateRoomSchema,
 } from "@repo/common/types";
 import { prismaClient } from "@repo/db/client";
+import { JWT_SECRET } from "@repo/backend-common/config";
 
 const app = express();
 app.use(express.json());
