@@ -4,8 +4,8 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc -b",
-    "dev": "tsc -b && node ./dist/index.js",
-    "start": "node dist/index.js"
+    "dev": "tsx src/index.ts",
+    "start": "node ./dist/index.js"
   },
   "dependencies": {
     "@repo/typescript-config": "workspace:*",
@@ -17,10 +17,11 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@repo/backend-common": "workspace:*",
+    "@repo/common": "workspace:*",
+    "@repo/db": "workspace:*",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/ws": "^8.18.1",
-    "@repo/backend-common": "workspace:*",
-    "@repo/db": "workspace:*",
-    "@repo/common": "workspace:*"
+    "tsx": "^4.20.3"
   }
 }
