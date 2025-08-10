@@ -7,11 +7,13 @@ import {
   SignInSchema,
   CreateRoomSchema,
 } from "@repo/common/types";
+import { prismaClient } from "@repo/db/client";
 
 const app = express();
+app.use(express.json());
 
-app.post("/signup", (req, res) => {
-  const data = CreateUserSchema.safeParse(req.body);
+app.post("/signup", async (req, res) => {
+  const data = await CreateUserSchema.safeParse(req.body);
 
   if (!data.success) {
     return res.json({
@@ -19,14 +21,27 @@ app.post("/signup", (req, res) => {
     });
   }
 
-  // db call
-  res.json({
-    message: "Hello world",
-  });
+  try {
+    await prismaClient.user.create({
+      data: {
+        email: data.data.username,
+        password: data.data.password,
+        name: data.data.name,
+      },
+    });
+
+    res.json({
+      message: "User signed up",
+    });
+  } catch (error) {
+    res.status(411).json({
+      error: "User exists",
+    });
+  }
 });
 
-app.post("/signin", (req, res) => {
-  const data = SignInSchema.safeParse(req.body);
+app.post("/signin", async (req, res) => {
+  const data = await SignInSchema.safeParse(req.body);
 
   if (!data.success) {
     return res.json({
@@ -34,7 +49,18 @@ app.post("/signin", (req, res) => {
     });
   }
 
-  const userId = 1;
+  const { email } = req.body;
+
+  const user = await prismaClient.user.findFirst({ where: { email } });
+
+  if (!user) {
+    return res.json({
+      message: "User does not exist. Please signup first.",
+    });
+  }
+
+  const userId = user.id;
+
   const token = jwt.sign(
     {
       userId,
@@ -45,8 +71,8 @@ app.post("/signin", (req, res) => {
   res.json({ token });
 });
 
-app.post("/room", auth, (req, res) => {
-  const data = CreateRoomSchema.safeParse(req.body);
+app.post("/room", auth, async (req, res) => {
+  const data = await CreateRoomSchema.safeParse(req.body);
 
   if (!data.success) {
     return res.json({
@@ -54,9 +80,17 @@ app.post("/room", auth, (req, res) => {
     });
   }
 
-  // db call
+  const { name } = req.body;
+
+  const newRoom = await prismaClient.room.create({
+    data: {
+      slug: name,
+      adminId: req.userId,
+    },
+  });
+
   res.json({
-    roomId: 123,
+    roomId: newRoom.id,
   });
 });
 
