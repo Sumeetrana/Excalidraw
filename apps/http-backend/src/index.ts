@@ -13,7 +13,7 @@ const app = express();
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
-  const data = await CreateUserSchema.safeParse(req.body);
+  const data = CreateUserSchema.safeParse(req.body);
 
   if (!data.success) {
     return res.json({
@@ -41,7 +41,7 @@ app.post("/signup", async (req, res) => {
 });
 
 app.post("/signin", async (req, res) => {
-  const data = await SignInSchema.safeParse(req.body);
+  const data = SignInSchema.safeParse(req.body);
 
   if (!data.success) {
     return res.json({
@@ -49,13 +49,19 @@ app.post("/signin", async (req, res) => {
     });
   }
 
-  const { email } = req.body;
-
-  const user = await prismaClient.user.findFirst({ where: { email } });
+  const user = await prismaClient.user.findFirst({
+    where: { email: data.data.username },
+  });
 
   if (!user) {
-    return res.json({
+    return res.status(403).json({
       message: "User does not exist. Please signup first.",
+    });
+  }
+
+  if (user.password !== data.data.password) {
+    return res.status(403).json({
+      message: "Incorrect password",
     });
   }
 
@@ -80,18 +86,22 @@ app.post("/room", auth, async (req, res) => {
     });
   }
 
-  const { name } = req.body;
+  try {
+    const newRoom = await prismaClient.room.create({
+      data: {
+        slug: data.data.name,
+        adminId: req.userId,
+      },
+    });
 
-  const newRoom = await prismaClient.room.create({
-    data: {
-      slug: name,
-      adminId: req.userId,
-    },
-  });
-
-  res.json({
-    roomId: newRoom.id,
-  });
+    res.json({
+      roomId: newRoom.id,
+    });
+  } catch (error) {
+    res.status(411).json({
+      error: "Room already exists",
+    });
+  }
 });
 
 app.listen(8080, () => {
